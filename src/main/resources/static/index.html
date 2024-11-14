@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="EN">
+<head>
+    <meta charset="utf-8">
+    <script>
+
+        const DOCS_RESOURCE_URL = "/docs";
+
+        function loadDocs() {
+            const divElement = document.getElementById("content");
+
+            divElement.innerHTML = "<p>Lade Docs ...</p>";
+
+            fetch(DOCS_RESOURCE_URL)
+                .then(response => response.json())
+                .then(docList =>
+                    docList
+                        .map(doc =>
+                            `<h2>${doc.title}</h2>
+                            <p>${doc.author}</p>
+                            <p>${doc.year}</p>`
+                        )
+                        .join("")
+                )
+                .catch(error => `<p>Fehler aufgetreten: ${error.message}</p>`)
+                .then(html => divElement.innerHTML = html);
+        }
+
+        document.addEventListener("DOMContentLoaded", loadDocs);
+    </script>
+    <title>Paperless</title>
+
+</head>
+
+<body>
+<h1>Documents</h1>
+<div id="content"></div>
+</body>
+</html>
