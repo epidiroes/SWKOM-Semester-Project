@@ -2,12 +2,13 @@ version: '4'
 services:
   db:
     image: postgres:latest
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: paperless
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=paperless
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - pdf_storage:/data/pdf
@@ -22,8 +23,14 @@ services:
       - "8081:8080"
     volumes:
       - .src:/app/src
+    depends_on:
+      - db
     environment:
-      - JAVA_OPTS=-Xmx512m
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/paperless
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_PROFILES_ACTIVE: docker
+       - JAVA_OPTS=-Xmx512m
     networks:
       custom_net:
         ipv4_address: 10.5.0.5
