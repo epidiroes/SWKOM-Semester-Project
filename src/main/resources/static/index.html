@@ -3,37 +3,82 @@
 <head>
     <meta charset="utf-8">
     <script>
-
         const DOCS_RESOURCE_URL = "/docs";
+        const UPLOAD_URL = "/upload";
 
-        function loadDocs() {
+        async function loadDocs() {
             const divElement = document.getElementById("content");
 
-            divElement.innerHTML = "<p>Lade Docs ...</p>";
+            divElement.innerHTML = "<p>Loading documents...</p>";
 
-            fetch(DOCS_RESOURCE_URL)
-                .then(response => response.json())
-                .then(docList =>
-                    docList
-                        .map(doc =>
-                            `<h2>${doc.title}</h2>
-                            <p>${doc.author}</p>
-                            <p>${doc.year}</p>`
-                        )
-                        .join("")
-                )
-                .catch(error => `<p>Fehler aufgetreten: ${error.message}</p>`)
-                .then(html => divElement.innerHTML = html);
+            try {
+                const response = await fetch(DOCS_RESOURCE_URL);
+                if (!response.ok) throw new Error("Failed to load documents.");
+                const docList = await response.json();
+
+                const docsHtml = docList
+                    .map(doc =>
+                        `<div class="document">
+                            <h2>${doc.title}</h2>
+                            <p>Author: ${doc.author}</p>
+                            <p>Year: ${doc.year}</p>
+                            <p><a href="${doc.url}" target="_blank">View Document</a></p>
+                        </div>`
+                    )
+                    .join("");
+
+                divElement.innerHTML = docsHtml || "<p>No documents available.</p>";
+            } catch (error) {
+                divElement.innerHTML = `<p>Error occurred: ${error.message}</p>`;
+            }
         }
 
-        document.addEventListener("DOMContentLoaded", loadDocs);
+        async function uploadFile(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+
+            if (!file || file.type !== "application/pdf") {
+                alert("Please upload a valid PDF file.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(UPLOAD_URL, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Failed to upload file.");
+                alert("File uploaded successfully!");
+                loadDocs(); // Refresh document list after upload
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDocs();
+            document.getElementById("uploadForm").addEventListener("submit", uploadFile);
+        });
     </script>
     <title>Paperless</title>
-
 </head>
 
 <body>
-<h1>Documents</h1>
+<h1>Paperless</h1>
+<h2>Upload</h2>
+<div id="uploadSection">
+    <form id="uploadForm">
+        <label for="fileInput">Upload PDF:</label>
+        <input type="file" id="fileInput" name="file" accept="application/pdf">
+        <button type="submit">Upload</button>
+    </form>
+</div>
+<h2>Documents</h2>
 <div id="content"></div>
 </body>
 </html>
