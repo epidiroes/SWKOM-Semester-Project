@@ -28,21 +28,29 @@ public class Doc {
     private String title;
 
     @NotNull
-    @CreatedDate
     private LocalDateTime uploadDate;
 
     @PrePersist
-    public void generateFilePath() {
-        // Erzeuge den Dateipfad im pdf_storage Volume
-        String generatedFilePath = Paths.get("/data/pdf_storage", id.toString() + ".pdf").toString();
+    public void setUploadDate(){
+        this.uploadDate = LocalDateTime.now();
+    }
 
-        // Setze den generierten Dateipfad in das Entity
-        this.filePath = generatedFilePath;
+    @PostPersist
+    public void generateFilePath() {
+        if(id != null){
+            // Erzeuge den Dateipfad im pdf_storage Volume
+            String generatedFilePath = Paths.get("/data/pdf_storage", id.toString() + ".pdf").toString();
+
+            // Setze den generierten Dateipfad in das Entity
+            this.filePath = generatedFilePath;
+        }
     }
 
     @NotNull
     private String filePath;
 
-    public Doc(String title) {}
+    public Doc(String title) {
+        this.title = title;
+    }
 
 }
