@@ -6,9 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @Data
@@ -35,22 +33,12 @@ public class Doc {
         this.uploadDate = LocalDateTime.now();
     }
 
-    @PostPersist
-    public void generateFilePath() {
-        if(id != null){
-            // Erzeuge den Dateipfad im pdf_storage Volume
-            String generatedFilePath = Paths.get("/data/pdf_storage", id.toString() + ".pdf").toString();
-
-            // Setze den generierten Dateipfad in das Entity
-            this.filePath = generatedFilePath;
-        }
-    }
-
     @NotNull
-    private String filePath;
+    private byte[] fileContent;
 
-    public Doc(String title) {
+    public Doc(String title, byte[] fileContent) {
         this.title = title;
+        this.fileContent = fileContent;
     }
 
 }
