@@ -1,6 +1,7 @@
 package fhtechnikum.at.swkom_paperless_groupf.apps.controller;
 
 import fhtechnikum.at.swkom_paperless_groupf.apps.entity.Doc;
+import fhtechnikum.at.swkom_paperless_groupf.apps.rabbitMQ.RabbitMQSender;
 import fhtechnikum.at.swkom_paperless_groupf.apps.service.DocService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,9 @@ public class DocController {
     @Autowired
     DocService docService;
 
+    @Autowired
+    RabbitMQSender rabbitMQSender;
+
     @GetMapping
     public ResponseEntity<List<Doc>> getDocs(){
 
@@ -30,6 +34,8 @@ public class DocController {
         if(file.isEmpty()){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+
+        rabbitMQSender.sendMessage("File is uploaded to PaperlessDB");
 
         // TODO: fix the return type, weil wtf soll das sein
         return new ResponseEntity<>(docService.saveDocument(file), HttpStatus.OK);
