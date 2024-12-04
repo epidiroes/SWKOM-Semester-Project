@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "t_documents")
+@Slf4j
 public class Doc {
 
     @Id
@@ -40,6 +42,7 @@ public class Doc {
     public Doc(String title, byte[] fileContent) {
         this.title = title;
         this.fileContent = fileContent;
+        log.debug("Doc entity created: title='{}', fileContentLength={}", title, fileContent.length);
     }
 
 }
