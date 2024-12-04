@@ -33,7 +33,7 @@ public class Doc {
         this.uploadDate = LocalDateTime.now();
     }
 
-    // TODO: Check if the content is complete! (files over 204,8 kB (weil DB das anzeigt))
+    // TODO: Check if the content is complete! (files over 204,8 kB (weil DB das anzeigt)
     @NotNull
     private byte[] fileContent;
 

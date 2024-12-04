@@ -12,6 +12,9 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.xml.validation.Validator;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -36,9 +39,13 @@ class DocServiceTest {
     }
 
     @Test
-    void testSaveDocument_WithValidDoc_ShouldPass() {
+    void testSaveDocument_WithValidDoc_ShouldPass() throws IOException {
         // Arrange
-        Doc validDoc = new Doc("Valid Title");
+        ClassLoader classLoader = getClass().getClassLoader();
+        File exampleFile = new File(classLoader.getResource("example.pdf").getFile());
+        byte[] fileContent = Files.readAllBytes(exampleFile.toPath());
+
+        Doc validDoc = new Doc("Valid Title", fileContent);
         when(docRepository.save(any(Doc.class))).thenReturn(validDoc);
 
         // Act
@@ -50,12 +57,16 @@ class DocServiceTest {
     }
 
     @Test
-    void testSaveDocument_WithInvalidTitle_ShouldFail() {
+    void testSaveDocument_WithInvalidTitle_ShouldFail() throws IOException {
         // Arrange
+        ClassLoader classLoader = getClass().getClassLoader();
+        File exampleFile = new File(classLoader.getResource("example.pdf").getFile());
+        byte[] fileContent = Files.readAllBytes(exampleFile.toPath());
+
         Doc invalidDoc = new Doc();
         invalidDoc.setTitle(""); // Invalid title (empty)
+        invalidDoc.setFileContent(fileContent);
         invalidDoc.setUploadDate(LocalDateTime.now());
-        invalidDoc.setFilePath("/data/pdf_storage/1.pdf");
 
         // Act
         Set<ConstraintViolation<Doc>> violations = validator.validate(invalidDoc);
@@ -67,12 +78,16 @@ class DocServiceTest {
     }
 
     @Test
-    void testSaveDocument_WithTooLongTitle_ShouldFail() {
+    void testSaveDocument_WithTooLongTitle_ShouldFail() throws IOException {
         // Arrange
+        ClassLoader classLoader = getClass().getClassLoader();
+        File exampleFile = new File(classLoader.getResource("example.pdf").getFile());
+        byte[] fileContent = Files.readAllBytes(exampleFile.toPath());
+
         Doc invalidDoc = new Doc();
         invalidDoc.setTitle("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"); // Invalid title (empty)
+        invalidDoc.setFileContent(fileContent);
         invalidDoc.setUploadDate(LocalDateTime.now());
-        invalidDoc.setFilePath("/data/pdf_storage/1.pdf");
 
         // Act
         Set<ConstraintViolation<Doc>> violations = validator.validate(invalidDoc);
@@ -84,12 +99,16 @@ class DocServiceTest {
     }
 
     @Test
-    void testSaveDocument_WithNullTitle_ShouldFail() {
+    void testSaveDocument_WithNullTitle_ShouldFail() throws IOException {
         // Arrange
+        ClassLoader classLoader = getClass().getClassLoader();
+        File exampleFile = new File(classLoader.getResource("example.pdf").getFile());
+        byte[] fileContent = Files.readAllBytes(exampleFile.toPath());
+
         Doc invalidDoc = new Doc();
-        invalidDoc.setTitle(null); // Invalid title (null)
+        invalidDoc.setTitle(null); // Invalid title - null
+        invalidDoc.setFileContent(fileContent);
         invalidDoc.setUploadDate(LocalDateTime.now());
-        invalidDoc.setFilePath("/data/pdf_storage/1.pdf");
 
         // Act
         Set<ConstraintViolation<Doc>> violations = validator.validate(invalidDoc);
@@ -99,12 +118,12 @@ class DocServiceTest {
     }
 
     @Test
-    void testSaveDocument_WithNullFilePath_ShouldFail() {
+    void testSaveDocument_WithNullFileContent_ShouldFail() {
         // Arrange
         Doc invalidDoc = new Doc();
-        invalidDoc.setTitle("Valid Title");
+        invalidDoc.setTitle("Valid title");
+        invalidDoc.setFileContent(null);
         invalidDoc.setUploadDate(LocalDateTime.now());
-        invalidDoc.setFilePath(null); // Invalid filePath
 
         // Act
         Set<ConstraintViolation<Doc>> violations = validator.validate(invalidDoc);
@@ -116,7 +135,7 @@ class DocServiceTest {
     @Test
     void testSaveDocument_WithNoValues_ShouldFail() {
         // Arrange
-        Doc invalidDoc = new Doc("");
+        Doc invalidDoc = new Doc();
 
         // Act
         Set<ConstraintViolation<Doc>> violations = validator.validate(invalidDoc);
