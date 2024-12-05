@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Paperless API",
+    "description": "API documentation for Paperless Application",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/docs/upload": {
+      "post": {
+        "tags": ["doc-controller"],
+        "summary": "Upload a document",
+        "description": "Uploads a document to the server.",
+        "operationId": "uploadDoc",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": ["file"],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Invalid file upload (e.g., empty file)"
+          },
+          "200": {
+            "description": "Document uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Doc"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error during file upload"
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "tags": ["doc-controller"],
+        "summary": "Get all documents",
+        "description": "Fetches a list of all available documents.",
+        "operationId": "getDocs",
+        "responses": {
+          "200": {
+            "description": "Documents retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Doc"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Doc": {
+        "required": ["fileContent", "title", "uploadDate"],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": {
+            "maxLength": 50,
+            "minLength": 2,
+            "type": "string"
+          },
+          "uploadDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fileContent": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        }
+      }
+    }
+  }
+}
