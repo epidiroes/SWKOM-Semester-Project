@@ -35,11 +35,11 @@ services:
 
   app:
     build:
-      context: .
+      context: ./RestUI
     ports:
       - "8081:8080"
     volumes:
-      - ./RestUI/src:/app/src
+      - .src:/app/src
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -72,6 +72,22 @@ services:
     networks:
       custom_net:
         ipv4_address: 10.5.0.2
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data --console-address ":9090"
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      MINIO_ACCESS_KEY: paperless
+      MINIO_SECRET_KEY: paperless1234
+    volumes:
+      - ./minio_data:/data
+    networks:
+      custom_net:
+        ipv4_address: 10.5.0.4
 
 networks:
   custom_net:

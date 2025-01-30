@@ -3,6 +3,7 @@ package fhtechnikum.at.swkom_paperless_groupf.apps.controller;
 import fhtechnikum.at.swkom_paperless_groupf.apps.entity.Doc;
 import fhtechnikum.at.swkom_paperless_groupf.apps.rabbitMQ.RabbitMQSender;
 import fhtechnikum.at.swkom_paperless_groupf.apps.service.DocService;
+import io.minio.errors.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -56,7 +59,7 @@ public class DocController {
     })
     @PostMapping("/upload")
     public ResponseEntity<Doc> uploadDoc(
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file) throws Exception {
         log.info("Received a file upload request: {}", file.getOriginalFilename());
 
         if (file.isEmpty()) {
@@ -69,7 +72,7 @@ public class DocController {
             rabbitMQSender.sendMessage("File is uploaded to PaperlessDB");
             log.info("File successfully saved: {}", savedDoc.getId());
             return new ResponseEntity<>(savedDoc, HttpStatus.OK);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Error while saving file: {}", file.getOriginalFilename(), e);
             throw e;
         }
