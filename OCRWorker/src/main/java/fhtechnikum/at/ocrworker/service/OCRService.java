@@ -19,6 +19,9 @@ public class OCRService {
     @Autowired
     MinioClient minioClient;
 
+    @Autowired
+    private ElasticsearchServiceOCR elasticsearchServiceOCR;
+
     private final Tesseract tesseract;
 
     private final RabbitMQSenderOCR rabbitMQSenderOCR;
@@ -61,7 +64,16 @@ public class OCRService {
 
             rabbitMQSenderOCR.sendMessageToRest(extractedText, fileName);
 
-            //TODO save extractedText in Elastic
+            try{
+                String[] parts = fileName.split("_", 2);
+                String id = parts[0];
+                String name = parts[1];
+
+                elasticsearchServiceOCR.indexDocument(id, name, extractedText);
+            }catch (Exception e){
+                log.error("Error occurred while indexing file with elasticsearch: {}", fileName, e);
+            }
+
 
         }catch (Exception e){
             log.error("Error OCR getFile", e);

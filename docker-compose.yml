@@ -9,6 +9,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=paperless
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -41,10 +46,16 @@ services:
     volumes:
       - .src:/app/src
     depends_on:
+      db:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      db:
+      elasticsearch:
         condition: service_started
+      kibana:
+        condition: service_started
+
+
     restart: on-failure
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/paperless
@@ -107,9 +118,45 @@ services:
       - rabbitmq
       - minio
       - app
+      - elasticsearch
     networks:
       custom_net:
         ipv4_address: 10.5.0.6
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - http.cors.allow-methods=OPTIONS,HEAD,GET,POST
+      - http.cors.allow-headers=X-Requested-With,Content-Type,Content-Length
+      - logger.level=error
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      custom_net:
+        ipv4_address: 10.5.0.7
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - logger.level=error
+    ports:
+      - "9092:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      custom_net:
+        ipv4_address: 10.5.0.8
 
 networks:
   custom_net:
@@ -122,3 +169,4 @@ networks:
 volumes:
   postgres_data:
   minio_data:
+  es-data:

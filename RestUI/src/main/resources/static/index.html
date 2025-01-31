@@ -4,33 +4,53 @@
     <meta charset="utf-8">
     <script>
         const DOCS_RESOURCE_URL = "/docs";
+        const SEARCH_URL = "/docs/search";
         const UPLOAD_URL = "/docs/upload";
+        let allDocs = []; // Speichert alle Dokumente für die Anzeige
 
         async function loadDocs() {
             const divElement = document.getElementById("content");
-
             divElement.innerHTML = "<p>Loading documents...</p>";
 
             try {
                 const response = await fetch(DOCS_RESOURCE_URL);
                 if (!response.ok) throw new Error("Failed to load documents.");
-                const docList = await response.json();
-
-                const docsHtml = docList
-                    .map(doc =>
-                        `<div class="document">
-                            <h2>${doc.title}</h2>
-                            <!--<p>Author: ${doc.author}</p>
-                            <p>Year: ${doc.year}</p>
-                            <p><a href="${doc.url}" target="_blank">View Document</a></p>   -->
-                        </div>`
-                    )
-                    .join("");
-
-                divElement.innerHTML = docsHtml || "<p>No documents available.</p>";
+                allDocs = await response.json();
+                displayDocs(allDocs);
             } catch (error) {
                 divElement.innerHTML = `<p>Error occurred: ${error.message}</p>`;
             }
+        }
+
+        function displayDocs(docs) {
+            const divElement = document.getElementById("content");
+            const docsHtml = docs.map(doc =>
+                `<div class="document">
+                    <p>${doc.title}</p>
+                </div>`
+            ).join("");
+            divElement.innerHTML = docsHtml || "<p>No documents available.</p>";
+        }
+
+        async function searchDocs() {
+            const query = document.getElementById("searchInput").value.trim();
+            if (!query) {
+                displayDocs(allDocs);
+                return;
+            }
+            try {
+                const response = await fetch(`${SEARCH_URL}?query=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error("Search failed.");
+                const searchResults = await response.json();
+                displayDocs(searchResults);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById("searchInput").value = "";
+            displayDocs(allDocs);
         }
 
         async function uploadFile(event) {
@@ -54,7 +74,7 @@
 
                 if (!response.ok) throw new Error("Failed to upload file.");
                 alert("File uploaded successfully!");
-                loadDocs(); // Refresh document list after upload
+                loadDocs();
             } catch (error) {
                 alert(`Error: ${error.message}`);
             }
@@ -63,6 +83,8 @@
         document.addEventListener("DOMContentLoaded", () => {
             loadDocs();
             document.getElementById("uploadForm").addEventListener("submit", uploadFile);
+            document.getElementById("searchButton").addEventListener("click", searchDocs);
+            document.getElementById("clearButton").addEventListener("click", clearSearch);
         });
     </script>
     <title>Paperless</title>
@@ -70,6 +92,10 @@
 
 <body>
 <h1>Paperless</h1>
+<h2>Search</h2>
+<input type="text" id="searchInput" placeholder="Search documents...">
+<button id="searchButton">Search</button>
+<button id="clearButton">Clear</button>
 <h2>Upload</h2>
 <div id="uploadSection">
     <form id="uploadForm">

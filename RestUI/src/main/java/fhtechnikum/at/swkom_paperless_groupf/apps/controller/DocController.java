@@ -1,7 +1,7 @@
 package fhtechnikum.at.swkom_paperless_groupf.apps.controller;
 
 import fhtechnikum.at.swkom_paperless_groupf.apps.entity.Doc;
-import fhtechnikum.at.swkom_paperless_groupf.apps.rabbitMQ.RabbitMQService;
+import fhtechnikum.at.swkom_paperless_groupf.apps.service.RabbitMQService;
 import fhtechnikum.at.swkom_paperless_groupf.apps.service.DocService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -72,4 +72,32 @@ public class DocController {
             throw e;
         }
     }
+
+    @Operation(summary = "Searches documents by query")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Documents retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = Doc.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid query parameter"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/search")
+    public ResponseEntity<List<Doc>> searchDocuments(@RequestParam String query) {
+        try {
+            if (query == null || query.trim().isEmpty()) {
+                log.error("Invalid query parameter: query cannot be null or empty");
+                return ResponseEntity.badRequest().build();
+            }
+
+            log.info("Searching documents with query: {}", query);
+            List<Doc> results = docService.searchDocuments(query);
+            return ResponseEntity.ok(results);
+
+        } catch (Exception e) {
+            log.error("Error occurred while searching documents: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+
+
 }
