@@ -5,6 +5,9 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/RestUi/pom.xml" />
+        <option value="$PROJECT_DIR$/OCRWorker/pom.xml" />
+        <option value="$PROJECT_DIR$/RestUI/pom.xml" />
       </list>
     </option>
   </component>
