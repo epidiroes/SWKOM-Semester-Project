@@ -58,6 +58,7 @@ public class DocService {
                 log.error("Failed to upload file to MinIO: {}", e.getMessage(), e);
                 throw e;
             }
+            log.info("Document successfully saved in minio with Name: {}", fileNameForMinio);
 
             return savedDoc;
         } catch (Exception e) {

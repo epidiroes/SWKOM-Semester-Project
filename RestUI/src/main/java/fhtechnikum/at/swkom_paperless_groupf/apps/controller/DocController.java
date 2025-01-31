@@ -1,15 +1,13 @@
 package fhtechnikum.at.swkom_paperless_groupf.apps.controller;
 
 import fhtechnikum.at.swkom_paperless_groupf.apps.entity.Doc;
-import fhtechnikum.at.swkom_paperless_groupf.apps.rabbitMQ.RabbitMQSender;
+import fhtechnikum.at.swkom_paperless_groupf.apps.rabbitMQ.RabbitMQService;
 import fhtechnikum.at.swkom_paperless_groupf.apps.service.DocService;
-import io.minio.errors.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,9 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -32,7 +27,7 @@ public class DocController {
     DocService docService;
 
     @Autowired
-    RabbitMQSender rabbitMQSender;
+    private RabbitMQService rabbitMQService;
 
     @Operation(summary = "Get all documents", description = "Fetches a list of all available documents.")
     @ApiResponses(value = {
@@ -69,7 +64,7 @@ public class DocController {
 
         try {
             Doc savedDoc = docService.saveDocument(file);
-            rabbitMQSender.sendMessage("File is uploaded to PaperlessDB");
+            rabbitMQService.sendMessageToOCR(savedDoc.getTitle(), savedDoc.getId().toString());
             log.info("File successfully saved: {}", savedDoc.getId());
             return new ResponseEntity<>(savedDoc, HttpStatus.OK);
         } catch (Exception e) {

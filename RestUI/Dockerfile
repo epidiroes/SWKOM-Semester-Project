@@ -5,10 +5,10 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 # Copy the JAR file into the container
-COPY target/SWKOM_Paperless_GroupF-0.0.1-SNAPSHOT.jar paperless.jar
+COPY target/RestUI-0.0.1-SNAPSHOT.jar restui.jar
 
 # Expose port 8081
 EXPOSE 8081
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "paperless.jar"]
+ENTRYPOINT ["java", "-jar", "restui.jar"]

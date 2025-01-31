@@ -9,12 +9,12 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>fhtechnikum.at</groupId>
-    <artifactId>SWKOM_Paperless_GroupF</artifactId>
+    <artifactId>RestUI</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>SWKOM_Paperless_GroupF</name>
+    <name>RestUI</name>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
     </properties>
     <dependencies>
         <dependency>
