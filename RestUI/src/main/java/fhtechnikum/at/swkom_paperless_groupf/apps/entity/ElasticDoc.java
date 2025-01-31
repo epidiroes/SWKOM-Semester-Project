@@ -19,6 +19,6 @@ public class ElasticDoc {
     private boolean ocrJobDone;
     private LocalDateTime uploadDate;
 
-    @JsonProperty("@timestamp") // mapping the Elasticsearch-Field "@timestamp" to "timestamp"
+    @JsonProperty("@timestamp")
     private String timestamp;
 }

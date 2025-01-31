@@ -18,14 +18,12 @@ public class RabbitMQService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    // Service1 sendet nur an Queue A (Service2 empfängt)
     public void sendMessageToOCR(String title, String id) {
         String infoForOCR = id + "_" + title;
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, infoForOCR);
         log.info("ID_Title gesendet: {}", infoForOCR);
     }
 
-    // Service1 empfängt nur von Queue B (Service2 sendet)
     @RabbitListener(queues = RabbitMQConfig.RESULT_QUEUE)
     public void receiveMessage(String message) {
         log.info("Nachricht empfangen: {}", message);

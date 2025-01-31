@@ -13,7 +13,7 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue ocrQueue() {
-        return new Queue(OCR_QUEUE, true); // durable Queue
+        return new Queue(OCR_QUEUE, true);
     }
 
     @Bean

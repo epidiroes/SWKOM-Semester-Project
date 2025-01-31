@@ -17,7 +17,6 @@ public class RabbitMQReceiverOCR {
         log.info("RabbitMQServiceOCR started");
     }
 
-    // Service1 empfängt nur von Queue B (Service2 sendet)
     @RabbitListener(queues = RabbitMQConfigOCR.OCR_QUEUE)
     public void receive(String message) {
         log.info("RabbitMQListener received message: {}", message);

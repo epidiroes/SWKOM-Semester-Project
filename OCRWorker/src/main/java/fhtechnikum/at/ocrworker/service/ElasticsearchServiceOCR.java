@@ -22,7 +22,7 @@ public class ElasticsearchServiceOCR {
         jsonMap.put("documentId", id);
         jsonMap.put("filename", filename);
         jsonMap.put("ocrText", ocrText);
-        jsonMap.put("@timestamp", Instant.now().toString()); // Add the @timestamp field
+        jsonMap.put("@timestamp", Instant.now().toString());
 
         // Create an index request
         IndexRequest<Map<String, Object>> request = IndexRequest.of(i -> i

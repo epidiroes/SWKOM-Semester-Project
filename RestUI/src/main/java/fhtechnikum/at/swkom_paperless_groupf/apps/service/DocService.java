@@ -26,7 +26,6 @@ public class DocService {
     private final DocRepository docRepository;
     private final MinioClient minioClient;
     private final ElasticSearchService elasticSearchService;
-    private final String bucketName = "documents";
 
     @Value("${minio.bucket}")
     protected String BUCKET_NAME;
@@ -83,7 +82,7 @@ public class DocService {
         String fileName = id + "_" + title;
 
         try (InputStream stream = minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucketName)
+                .bucket(BUCKET_NAME)
                 .object(fileName)
                 .build())) {
             byte[] fileData = stream.readAllBytes();

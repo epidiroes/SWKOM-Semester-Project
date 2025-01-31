@@ -17,7 +17,6 @@ public class RabbitMQSenderOCR {
         log.info("RabbitMQServiceOCR started");
     }
 
-    // Service1 sendet nur an Queue A (Service2 empfängt)
     public void sendMessageToRest(String title, String id) {
         String infoForRest = id + "_" + title;
         rabbitTemplate.convertAndSend(RabbitMQConfigOCR.RESULT_QUEUE, infoForRest);

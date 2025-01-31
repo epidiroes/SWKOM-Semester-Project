@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <!-- Log für RabbitMQ und Spring AMQP auf DEBUG setzen -->
+    <!-- Logging for RabbitMQ and Spring AMQP set to DEBUG-->
     <logger name="com.rabbitmq" level="DEBUG"/>
     <logger name="org.springframework.amqp" level="DEBUG"/>
 
