@@ -1,14 +1,26 @@
-# Use an official JDK runtime as a parent image
-FROM openjdk:21-jdk-slim
+# 1. Build Stage
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-# Set the working directory in the container
+# Setze das Arbeitsverzeichnis
 WORKDIR /app
 
-# Copy the JAR file into the container
-COPY target/RestUI-0.0.1-SNAPSHOT.jar restui.jar
+# Kopiere das Maven-Projekt ins Container-Image
+COPY . .
 
-# Expose port 8081
+# Baue die Anwendung mit Maven
+RUN mvn clean package -DskipTests
+
+# 2. Runtime Stage
+FROM openjdk:21-jdk-slim
+
+# Setze das Arbeitsverzeichnis
+WORKDIR /app
+
+# Kopiere die fertige JAR-Datei aus dem vorherigen Build-Container
+COPY --from=builder /app/target/RestUI-0.0.1-SNAPSHOT.jar restui.jar
+
+# Exponiere Port 8081
 EXPOSE 8081
 
-# Run the application
+# Starte die Anwendung
 ENTRYPOINT ["java", "-jar", "restui.jar"]
