@@ -13,6 +13,7 @@ import io.minio.*;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -25,6 +26,7 @@ public class DocService {
     private final DocRepository docRepository;
     private final MinioClient minioClient;
     private final ElasticSearchService elasticSearchService;
+    private final String bucketName = "documents";
 
     @Value("${minio.bucket}")
     protected String BUCKET_NAME;
@@ -67,6 +69,28 @@ public class DocService {
             return savedDoc;
         } catch (Exception e) {
             log.error("Error saving document: {}", fileToSave.getOriginalFilename(), e);
+            throw e;
+        }
+    }
+
+    public Doc getDocById(long id) {
+        log.info("Fetching doc by ID: {}", id);
+        return docRepository.findById(id).orElse(null);
+    }
+
+    public byte[] getFile(String id, String title) throws Exception {
+        log.info("Fetching doc by ID and title: {} {}", id, title);
+        String fileName = id + "_" + title;
+
+        try (InputStream stream = minioClient.getObject(GetObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fileName)
+                .build())) {
+            byte[] fileData = stream.readAllBytes();
+            log.info("File successfully retrieved for document ID: {}", id);
+            return fileData;
+        } catch (Exception e) {
+            log.error("Error retrieving file for document ID {}: {}", id, e.getMessage(), e);
             throw e;
         }
     }

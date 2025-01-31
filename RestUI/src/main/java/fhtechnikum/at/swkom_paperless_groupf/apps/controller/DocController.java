@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -98,6 +100,35 @@ public class DocController {
         }
     }
 
+    @Operation(summary = "Fetches a document by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Document retrieved successfully", content = @Content(schema = @Schema(implementation = Doc.class))),
+            @ApiResponse(responseCode = "404", description = "Document not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/download")
+    public ResponseEntity<byte[]> getDocumentById(@RequestParam String id, String title) {
+        try {
+            byte[] pdfFile = docService.getFile(id, title);
+            Doc document = docService.getDocById(Long.parseLong(id));
+            if (document == null || pdfFile == null) {
+                return ResponseEntity.notFound().build();
+            }
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", document.getTitle());
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfFile);
+        } catch (IllegalArgumentException e) {
+            log.error("Document not found: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error retrieving document with ID {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).build();
+        }
+    }
 
 }

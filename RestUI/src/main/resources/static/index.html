@@ -6,7 +6,8 @@
         const DOCS_RESOURCE_URL = "/docs";
         const SEARCH_URL = "/docs/search";
         const UPLOAD_URL = "/docs/upload";
-        let allDocs = []; // Speichert alle Dokumente für die Anzeige
+        const DOWNLOAD_URL = "/docs/download";
+        let allDocs = [];
 
         async function loadDocs() {
             const divElement = document.getElementById("content");
@@ -27,9 +28,15 @@
             const docsHtml = docs.map(doc =>
                 `<div class="document">
                     <p>${doc.title}</p>
+                    <button onclick="downloadDoc('${doc.id}', '${doc.title}')">Download</button>
+                </div>
                 </div>`
             ).join("");
             divElement.innerHTML = docsHtml || "<p>No documents available.</p>";
+        }
+
+        function downloadDoc(docId, docTitle) {
+            window.location.href = `${DOWNLOAD_URL}?id=${encodeURIComponent(docId)}&title=${encodeURIComponent(docTitle)}`
         }
 
         async function searchDocs() {
